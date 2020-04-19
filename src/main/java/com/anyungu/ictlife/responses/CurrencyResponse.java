@@ -3,7 +3,7 @@ package com.anyungu.ictlife.responses;
 import com.anyungu.ictlife.models.Currency;
 
 // Currency Response Model
-public class CurrencyResponse<T> {
+public class CurrencyResponse {
 
 	private Integer code;
 
