@@ -3,11 +3,15 @@ package com.anyungu.ictlife.service;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import com.anyungu.ictlife.models.LanguageTranslation;
 import com.anyungu.ictlife.models.StockPrice;
 import com.anyungu.ictlife.responses.CurrencyResponse;
 import com.anyungu.ictlife.responses.GeneralDataResponse;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import okhttp3.Call;
@@ -16,6 +20,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+
+@Service
 public class IctlifeApplicationStockService {
 
 
@@ -64,6 +70,10 @@ public class IctlifeApplicationStockService {
 
         //unsupported language and currency
         if (currencyS.getCode() != 200 && languageS.getCode() != 200) {
+
+            System.out.println("The currency & language you typed is not supported");
+
+
             GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
             generalDataResponse.setCode(400);
             generalDataResponse.setData("The currency & language you typed is not supported");
@@ -73,6 +83,10 @@ public class IctlifeApplicationStockService {
 
         //unsuported language
         if (currencyS.getCode() == 200 && languageS.getCode() != 200) {
+
+            System.out.println("The language you typed is not supported");
+
+
             GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
             generalDataResponse.setCode(400);
             generalDataResponse.setData("The language you typed is not supported");
@@ -84,25 +98,26 @@ public class IctlifeApplicationStockService {
         //unsuported currency
         if (currencyS.getCode() != 200 && languageS.getCode() == 200) {
 
-         translateText("The currency you typed is not supported", languageCode);
+         String translated = translateText("The currency you typed is not supported", languageCode);
+         System.out.println(translated);
 
             GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
             generalDataResponse.setCode(400);
-            generalDataResponse.setMessage("");
+            generalDataResponse.setMessage(translated);
 
             return generalDataResponse;
         }
     }
 
 
-        translateText("The current price for", languageCode);
+        String translatedOne = translateText("The current price for", languageCode);
 
-        translateText("is", languageCode);
+        String translatedTwo = translateText("is", languageCode);
 
 
 
         companyStock.forEach((k, v) -> {
-            System.out.println("The current price for "+ k +" is " + v);
+            System.out.println(translatedOne + " "+ k + " "+ translatedTwo + " " + v);
         });
 
         GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
@@ -117,7 +132,7 @@ public class IctlifeApplicationStockService {
 
 
 
-      private void translateText(String rawText, String languageCode) {
+      private String translateText(String rawText, String languageCode) {
 
 
         try{
@@ -139,20 +154,30 @@ public class IctlifeApplicationStockService {
 				// http call to get file
                 Response response = call.execute();
                 
-                System.out.println(response.headers().toString());
+
+                ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                LanguageTranslation languageTranslation = objectMapper.readValue(response.body().string(), LanguageTranslation.class);  
+
+                if (languageTranslation.getCode() == 200) {
+                    return languageTranslation.getText();
+                }
+
+                return rawText;
 
                 
         } catch (Exception e) {
             GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
             generalDataResponse.setCode(400);
             generalDataResponse.setMessage(e.getMessage());
+
+            return rawText;
         }
       
       }
 
 
 
-      	//getStockStartMenu
+    //getStockStartMenu
 	public HashMap<String, String> fetchUserInputMenuStock() {
 
 

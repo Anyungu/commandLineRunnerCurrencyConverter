@@ -360,7 +360,7 @@ public class IctlifeApplicationService {
 				// check if response is csv or not
 				if (stringContentType.contentEquals("text/csv")) {
 
-					System.out.println(response.body().toString());
+					System.out.println(response.body().string());
 				
 					// String currLine = "";
 					// StringTokenizer tokenizer;
@@ -447,7 +447,7 @@ public class IctlifeApplicationService {
 					if (stringContentType.contentEquals("text/csv")) {
 	
 				
-						System.out.println(response.body().toString());
+						System.out.println(response.body().string());
 
 						GeneralDataResponse<?> curResponse = new GeneralDataResponse<>();
 	
