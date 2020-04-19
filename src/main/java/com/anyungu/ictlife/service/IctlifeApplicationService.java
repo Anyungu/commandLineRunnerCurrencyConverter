@@ -2,7 +2,6 @@ package com.anyungu.ictlife.service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -57,6 +56,11 @@ public class IctlifeApplicationService {
 				curResponse.setCode(400);
 				curResponse.setMessage("Oops, File containing currencies may be unavailable. Contact Admin");
 
+
+				System.out.println();
+				System.out.println("Oops, File containing currencies may be unavailable. Contact Admin");
+
+
 				return curResponse;
 
 			}
@@ -68,6 +72,9 @@ public class IctlifeApplicationService {
 
 			curResponse.setCode(400);
 			curResponse.setMessage(e.getMessage());
+
+			System.out.println();
+			System.out.println(e.getMessage());
 
 			return curResponse;
 
@@ -95,6 +102,7 @@ public class IctlifeApplicationService {
 					// if currency exists, it's usable, inform the user
 					if (currency.contentEquals(stringList.get(2))) {
 
+
 						Currency cur = new Currency();
 						cur.setCountry(stringList.get(0));
 						cur.setCurrency(stringList.get(1));
@@ -105,6 +113,9 @@ public class IctlifeApplicationService {
 						curResponse.setCode(200);
 						curResponse.setMessage("Currency is Applicable");
 						curResponse.setCurrency(cur);
+
+						System.out.println();
+						System.out.println("Currency "+stringList.get(2) + " is applicable for country " + stringList.get(0));
 
 						return curResponse;
 
@@ -119,11 +130,19 @@ public class IctlifeApplicationService {
 			curResponse.setCode(400);
 			curResponse.setMessage("Oops, Currency is invalid");
 
+			System.out.println();
+			System.out.println("Oops, Currency is invalid");
+
+
 			return curResponse;
 		} catch (Exception e) {
 
 			// we dont know what might have gone wrong
 			CurrencyResponse curResponse = new CurrencyResponse();
+
+
+			System.out.println();
+			System.out.println(e.getMessage());
 
 			curResponse.setCode(400);
 			curResponse.setMessage(e.getMessage());
@@ -163,6 +182,9 @@ public class IctlifeApplicationService {
 					curResponse.setCode(400);
 					curResponse.setMessage("Oops, File containing languages may be unavailable. Contact Admin");
 	
+
+					System.out.println();
+					System.out.println("Oops, File containing languages may be unavailable. Contact Admin");
 					return curResponse;
 	
 				}
@@ -174,6 +196,9 @@ public class IctlifeApplicationService {
 	
 				curResponse.setCode(400);
 				curResponse.setMessage(e.getMessage());
+
+				System.out.println();
+				System.out.println(e.getMessage());
 	
 				return curResponse;
 	
@@ -208,7 +233,12 @@ public class IctlifeApplicationService {
 							GeneralDataResponse<?> curResponse = new GeneralDataResponse<>();
 	
 							curResponse.setCode(200);
-							curResponse.setMessage("Currency is Applicable");
+							curResponse.setMessage("Language is Applicable");
+
+
+						System.out.println();
+						System.out.println("Language "+stringList.get(1) + " is applicable");
+
 						
 	
 							return curResponse;
@@ -222,7 +252,10 @@ public class IctlifeApplicationService {
 				GeneralDataResponse<?> curResponse = new GeneralDataResponse<>();
 	
 				curResponse.setCode(400);
-				curResponse.setMessage("Oops, Currency is invalid");
+				curResponse.setMessage("Oops, Language is invalid");
+
+				System.out.println();
+					System.out.println("Oops, Language is invalid");
 	
 				return curResponse;
 			} catch (Exception e) {
@@ -232,6 +265,9 @@ public class IctlifeApplicationService {
 	
 				curResponse.setCode(400);
 				curResponse.setMessage(e.getMessage());
+
+				System.out.println();
+					System.out.println(e.getMessage());
 	
 				return curResponse;
 			}
@@ -286,7 +322,7 @@ public class IctlifeApplicationService {
 
 		String choiceOne = scanner.nextLine();
 
-		return choiceOne;
+		return choiceOne.toUpperCase();
 	}
 
 
@@ -307,7 +343,7 @@ public class IctlifeApplicationService {
 
 		String choiceOne = scanner.nextLine();
 
-		return choiceOne;
+		return choiceOne.toLowerCase();
 	}
 
 	//ask user to try again
@@ -354,8 +390,6 @@ public class IctlifeApplicationService {
 
 			String stringContentType = response.header("content-type").toString();
 
-			List<Currency> curList = new ArrayList<>();
-
 
 				// check if response is csv or not
 				if (stringContentType.contentEquals("text/csv")) {
@@ -390,6 +424,8 @@ public class IctlifeApplicationService {
 	
 					curResponse.setCode(200);
 					curResponse.setMessage("Found and listed");
+
+					
 	
 					return curResponse;
 	
@@ -401,6 +437,10 @@ public class IctlifeApplicationService {
 					curResponse.setCode(400);
 					curResponse.setMessage("Oops, File containing currencies may be unavailable. Contact Admin");
 	
+
+					System.out.println();
+					System.out.println("Oops, File containing currencies may be unavailable. Contact Admin");
+
 					return curResponse;
 	
 				}
@@ -413,6 +453,10 @@ public class IctlifeApplicationService {
 
 			curResponse.setCode(400);
 			curResponse.setData(e.getMessage());
+
+
+			System.out.println();
+					System.out.println(e.getMessage());
 
 			return curResponse;
 
@@ -464,6 +508,11 @@ public class IctlifeApplicationService {
 						lanResponse.setCode(400);
 						lanResponse.setData("Oops, File containing currencies may be unavailable. Contact Admin");
 		
+
+						System.out.println();
+					System.out.println("Oops, File containing languages may be unavailable. Contact Admin");
+
+
 						return lanResponse;
 		
 					}
@@ -476,6 +525,9 @@ public class IctlifeApplicationService {
 	
 				lanResponse.setCode(400);
 				lanResponse.setData(e.getMessage());
+
+				System.out.println();
+					System.out.println(e.getMessage());
 	
 				return lanResponse;
 	

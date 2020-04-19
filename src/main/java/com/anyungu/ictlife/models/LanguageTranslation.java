@@ -1,11 +1,13 @@
 package com.anyungu.ictlife.models;
 
+import java.util.List;
+
 public class LanguageTranslation {
     private Integer code;
 
     private String lang;
 
-    private String text;
+    private List<String> text;
 
     public Integer getCode() {
         return code;
@@ -23,13 +25,15 @@ public class LanguageTranslation {
         this.lang = lang;
     }
 
-    public String getText() {
+    public List<String> getText() {
         return text;
     }
 
-    public void setText(String text) {
+    public void setText(List<String> text) {
         this.text = text;
     }
+
+   
 
     
 }

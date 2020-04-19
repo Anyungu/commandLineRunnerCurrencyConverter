@@ -3,6 +3,7 @@ package com.anyungu.ictlife.service;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import com.anyungu.ictlife.models.CurrencyTranslation;
 import com.anyungu.ictlife.models.LanguageTranslation;
 import com.anyungu.ictlife.models.StockPrice;
 import com.anyungu.ictlife.responses.CurrencyResponse;
@@ -51,7 +52,9 @@ public class IctlifeApplicationStockService {
       if (StringUtils.isEmpty(languageCode) && StringUtils.isEmpty(currencyCode)) {
 
             companyStock.forEach((k, v) -> {
-                System.out.println("The current price for "+ k +" is " + v);
+
+                Double cur = convertCurrencyLayer(v, currencyCode);
+                System.out.println("The current price for "+ k +" is " + cur + " " + currencyCode);
             });
 
             GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
@@ -117,7 +120,12 @@ public class IctlifeApplicationStockService {
 
 
         companyStock.forEach((k, v) -> {
-            System.out.println(translatedOne + " "+ k + " "+ translatedTwo + " " + v);
+
+            Double cur = convertCurrencyLayer(v, currencyCode);
+          
+            System.out.println(translatedOne + " "+ k + " "+ translatedTwo + " " + cur + " "  + currencyCode);
+            
+           
         });
 
         GeneralDataResponse<String> generalDataResponse = new GeneralDataResponse<>();
@@ -131,7 +139,8 @@ public class IctlifeApplicationStockService {
       
 
 
-
+      //translate text
+      //return original text if translation fails
       private String translateText(String rawText, String languageCode) {
 
 
@@ -153,13 +162,14 @@ public class IctlifeApplicationStockService {
 	
 				// http call to get file
                 Response response = call.execute();
-                
 
+                String string = response.body().string();
+                
                 ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                LanguageTranslation languageTranslation = objectMapper.readValue(response.body().string(), LanguageTranslation.class);  
+                LanguageTranslation languageTranslation = objectMapper.readValue(string, LanguageTranslation.class);  
 
                 if (languageTranslation.getCode() == 200) {
-                    return languageTranslation.getText();
+                    return languageTranslation.getText().get(0);
                 }
 
                 return rawText;
@@ -174,6 +184,115 @@ public class IctlifeApplicationStockService {
         }
       
       }
+
+    //currencyLayer convertCurrency
+    //first coversion API
+    private Double convertCurrencyLayer(Double amount, String to) {
+
+        try{
+            OkHttpClient client = new OkHttpClient();
+
+
+            HttpUrl url = HttpUrl.parse("http://api.currencylayer.com/convert").newBuilder()
+                .addQueryParameter("access_key", "dc0b2281d765e4bfe38defc8969ba55e")
+                .addQueryParameter("from", "USD")       
+                .addQueryParameter("to", to)      
+                .addQueryParameter("amount", String.valueOf(amount))
+                .build();
+
+            Request requestHttp = new Request.Builder().get().url(url) 
+                .build();
+
+
+				Call call = client.newCall(requestHttp);
+	
+				// http call to get file
+                Response response = call.execute();
+
+                ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                CurrencyTranslation curTranslation = objectMapper.readValue(response.body().string(), CurrencyTranslation.class);  
+
+                //fall back if first API fails
+                if (curTranslation.getSuccess() == false) {
+                   Double converted = convertFixer(amount, to);
+
+                   if (converted != 0.0) {
+                       return converted;
+                   }
+
+                  return amount;
+                  
+                }
+
+                return curTranslation.getResult();
+            }
+            catch(Exception e) {
+                System.out.println(e.getMessage());
+                return 0.0;
+            }
+
+    }
+
+
+      //Fixer convertCurrency
+      //second conversion API
+      private Double convertFixer(Double amount, String to) {
+
+        try{
+            OkHttpClient client = new OkHttpClient();
+
+
+            HttpUrl url = HttpUrl.parse("http://data.fixer.io/api/convert").newBuilder()
+                .addQueryParameter("access_key", "dc0b2281d765e4bfe38defc8969ba55e")
+                .addQueryParameter("from", "USD")       
+                .addQueryParameter("to", to)      
+                .addQueryParameter("amount", String.valueOf(amount))  
+                .build();
+
+            Request requestHttp = new Request.Builder().get().url(url) 
+                .build();
+
+
+				Call call = client.newCall(requestHttp);
+	
+				// http call to get file
+                Response response = call.execute();
+
+                String string = response.body().string();
+
+    
+
+                ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                CurrencyTranslation curTranslation = objectMapper.readValue(string, CurrencyTranslation.class);  
+
+                if (curTranslation.getSuccess() == false) {
+                 
+                System.out.println();
+                   System.out.println("*********************");
+                   System.out.println();
+                   System.out.println("Both conversion APIs failed. Contact Admin with the message shown below");
+                   System.out.println();
+                   System.out.println(string);
+                   System.out.println();
+                   System.out.println("Falling back to USD");
+                   System.out.println();
+                   System.out.println();
+
+                   return 0.0;
+                }
+
+               
+                return curTranslation.getResult();
+            }
+            catch(Exception e) {
+
+                System.out.println(e.getMessage());
+                return 0.0;
+
+            }
+
+    }
+
 
 
 
@@ -196,6 +315,7 @@ public class IctlifeApplicationStockService {
 
         String choiceOne = scanner.nextLine();
         
+        System.out.println();
 
         System.out.println("Please type the code of the currency you want to use. Press enter to use default");
 		System.out.println();
@@ -203,9 +323,11 @@ public class IctlifeApplicationStockService {
         
 
         String choiceTwo = scanner.nextLine();
+        System.out.println();
+        System.out.println();
 
-        choices.put("choiceOne", choiceOne);
-        choices.put("choiceTwo", choiceTwo);
+        choices.put("choiceOne", choiceOne.toLowerCase());
+        choices.put("choiceTwo", choiceTwo.toUpperCase());
 
 		return choices;
 	}
